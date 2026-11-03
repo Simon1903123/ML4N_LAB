@@ -1,0 +1,24 @@
+# LaTeX build files
+*.aux
+*.bbl
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.synctex.gz(busy)
+
+# Se usi minted
+*.minted*
+_minted-*/
+
+# File di sistema
+.DS_Store
+Thumbs.db

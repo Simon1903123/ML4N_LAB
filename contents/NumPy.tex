@@ -1,0 +1,529 @@
+\chapter{NumPy}
+\section{NumPy and Computation Efficiency}
+NumPy is not part of Python itself; it is an external library that needs to be installed (e.g., via \texttt{pip install numpy}).
+
+\subsection{Loading NumPy}
+The standard convention for importing NumPy is to use the alias \textbf{np}. This convention is widely adopted and improves code readability.
+
+\lstinputlisting[caption={Loading NumPy.}]{contents/listings/numpy/import_numpy.py}
+
+\subsection{From Lists to Arrays}
+The core object in NumPy is the array. Unlike standard Python lists, NumPy arrays have specific characteristics:
+\begin{itemize}
+    \item \textbf{Fixed type:} All elements within an array share the same data type, known as the \textbf{dtype}. For example, \textbf{float64} represents a 64-bit floating-point number, occupying 8 bytes per element.
+    \item \textbf{Multidimensional:} Arrays can represent vectors, matrices, and N-dimensional arrays. The \textbf{shape} attribute defines the size of the array along each dimension.
+    \item \textbf{Flexible indexing:} NumPy supports advanced indexing techniques, allowing element selection based on conditions or lists of positions, beyond standard slicing.
+\end{itemize}
+
+\lstinputlisting[caption={Creating Array}]{contents/listings/numpy/create_array.py}
+
+
+\subsection{Why NumPy is Faster and More Memory Efficient}
+NumPy is significantly more efficient than standard Python lists in terms of both speed and memory usage. This efficiency makes it the foundational library for data science tools like scikit-learn, SciPy, and pandas.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{contents/Images/NumPy/contigous_addresses.png}
+    \caption{Addressing Example}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Python List:} A Python list stores references to objects. Each element is a reference to a full Python object (like a \textbf{PyObject}), and each object carries its own header containing metadata (like reference count and type). For instance, a typical float in a list might take 24 bytes (16 for the header, 8 for the value), plus the 8-byte reference slot in the list, totaling 32 bytes per element.
+    \item \textbf{NumPy Array:} A NumPy array is a single, contiguous block of raw values in memory. It has a fixed type, so there is no per-element overhead; type checking happens only once. For example, a \textbf{float64} element takes exactly 8 bytes. Because values sit side-by-side, the CPU can read them efficiently in cache-friendly blocks. Operations are vectorized, meaning the loops run in compiled code (like C) without needing a Python object for every element.
+\end{itemize}
+
+
+\section{NumPy Arrays}
+
+\subsection{From Nested Lists to Multidimensional Arrays}
+Arrays can have an arbitrary number of dimensions. While a 1-D vector can be created from a simple Python list, nested lists are used to create arrays with multiple dimensions (2D matrices, 3D arrays, etc.).
+
+\lstinputlisting[caption={Creating 1D, 2D, and 3D arrays from nested lists.}]{contents/listings/numpy/multidimensional_arrays.py}
+
+\subsection{Axes and Shape}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{contents/Images/NumPy/Dimensions.png}
+    \caption{1D, 2D and 3D arrays mechanism}
+\end{figure}
+
+\begin{itemize}
+    \item The \textbf{axes} of an array define its dimensions: a 1-D vector has 1 axis, a 2D matrix has 2 axes, and an N-D array has N axes.
+    \item The \textbf{shape} is a tuple that specifies the number of elements along each axis. For example, a 1-element tuple is written as \texttt{(3,)} with a trailing comma.
+    \item When a new dimension is added, it is placed on the left of the shape tuple (becoming axis 0), and the existing axes shift one position to the right.
+    \item Axes can also be referenced using negative numbers, counting backward from the end. \textbf{Axis -1 is always along the rows} (moving across the columns within each row), regardless of the total number of dimensions.
+\end{itemize}
+
+\subsection{Data Types (\texttt{dtype})}
+NumPy defines its own specific data types, and all elements within a single array must share the exact same type, referred to as the \texttt{dtype}.
+\begin{itemize}
+    \item \textbf{Integers:} \texttt{int8}, \texttt{int16}, \texttt{int32}, \texttt{int64} (and their unsigned counterparts like \texttt{uint8}). The number indicates the width in bits.
+    \item \textbf{Floats:} \texttt{float16}, \texttt{float32}, \texttt{float64}. While \texttt{float64} is the default, using \texttt{float32} halves the memory usage, and \texttt{float16} uses only 2 bytes per element at the cost of precision.
+    \item \textbf{Booleans:} \texttt{bool} takes one byte per element and is heavily used for creating masks.
+\end{itemize}
+
+NumPy automatically infers the data type from the provided values. If mixed types (e.g., integers and floats) are provided, NumPy performs \textbf{upcasting}, choosing a type that can safely hold all values (usually \texttt{float64}). You can also explicitly force a type using the \texttt{dtype} argument.
+
+\lstinputlisting[caption={Data type inference and explicit declaration.}]{contents/listings/numpy/array_dtypes.py}
+
+\subsection{1-D Vector vs. Column Vector}
+It is crucial to understand the difference between a 1-D vector and a column vector, as confusing them often leads to broadcasting errors.
+\begin{itemize}
+    \item \textbf{1-D Vector:} Has exactly 1 axis and a shape like \texttt{(3,)}. It generally behaves like a row vector.
+    \item \textbf{Column Vector:} Has 2 axes and a shape like \texttt{(3, 1)}. It is technically a 2D matrix that happens to have only one column.
+\end{itemize}
+
+\lstinputlisting[caption={Difference between 1-D vectors and 2D column vectors.}]{contents/listings/numpy/vector_vs_column.py}
+
+
+
+\subsection{Creating Arrays from Scratch}
+NumPy provides several optimized functions to generate arrays without manually typing lists:
+\begin{itemize}
+    \item \texttt{np.zeros(shape)} / \texttt{np.ones(shape)}: Creates an array filled entirely with zeros or ones.
+    \item \texttt{np.full(shape, value)}: Creates an array where every element is set to \texttt{value}.
+    \item \texttt{np.linspace(start, stop, num)}: Generates \texttt{num} evenly spaced samples from \texttt{start} to \texttt{stop} (\textbf{stop is included}).
+    \item \texttt{np.arange(start, stop, step)}: Works like Python's standard \texttt{range}, generating values with a given \texttt{step} (\textbf{stop is excluded}).
+    \item \texttt{np.random.random(shape)}: Generates uniformly distributed random numbers in the interval $[0, 1)$.
+    \item \texttt{np.random.normal(mean, std, shape)}: Generates random numbers drawn from a normal distribution.
+\end{itemize}
+
+\lstinputlisting[caption={Generating arrays using NumPy's built-in functions.}]{contents/listings/numpy/scratch_creation.py}
+
+
+\subsection{Main Attributes of an Array}
+Every NumPy array comes with built-in attributes that describe its structure.
+\begin{itemize}
+    \item \texttt{ndim}: The total number of dimensions.
+    \item \texttt{shape}: A tuple representing the sizes of the array along each dimension.
+    \item \texttt{size}: The total number of elements in the array (the product of the shape values).
+\end{itemize}
+These can be accessed either as attributes (e.g., \texttt{x.shape}) or via functions (e.g., \texttt{np.shape(x)}).
+
+\lstinputlisting[caption={Accessing array attributes.}]{contents/listings/numpy/array_attributes.py}
+
+
+
+\section{Computation with NumPy Arrays}
+NumPy allows you to perform operations on entire arrays efficiently without using explicit Python loops. There are four main categories of operations:
+
+\begin{itemize}
+    \item \textbf{Binary Universal Functions (ufuncs):} Operations like \texttt{x+y}, \texttt{x*y}, \texttt{x**y} are applied element-by-element. They return an array with the same shape as the inputs.
+    \item \textbf{Unary Universal Functions (ufuncs):} Operations like \texttt{np.abs(x)}, \texttt{np.exp(x)}, \texttt{np.log2(x)} are applied element-by-element on a single array. They return a new array of the same shape and do not modify the original array.
+    \item \textbf{Aggregations:} Functions like \texttt{x.sum()}, \texttt{x.mean()}, \texttt{x.min()} combine many cells into a single value, or reduce the array by one axis if the \texttt{axis=} parameter is provided.
+    \item \textbf{Algebra:} Operations like \texttt{np.dot(x, y)} or \texttt{x @ y} perform standard linear algebra computations (e.g., matrix products, rows against columns).
+\end{itemize}
+
+\subsection{Binary and Unary Operations}
+When using binary operators like \texttt{*} or \texttt{**}, NumPy pairs the cells in the exact same positions. It is important to remember that \texttt{x * y} performs element-wise multiplication, not the matrix product.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{contents/Images/NumPy/sub_binary_unary.png}
+    \caption{Binary and Unary Operations}
+\end{figure}
+
+\lstinputlisting[caption={Element-wise binary and unary operations.}]{contents/listings/numpy/binary_unary.py}
+
+
+\subsection{Aggregate Functions}
+Aggregate functions can be called either via the NumPy module (e.g., \texttt{np.mean(x)}) or directly as array methods (e.g., \texttt{x.mean()}).
+\begin{itemize}
+    \item \textbf{Entire array:} If no axis is specified, the aggregation is computed over the entire array. For example, \texttt{x.argmax()} returns the position of the maximum value as if the array were flattened and read row by row.
+    \item \textbf{Along an axis:} The \texttt{axis=} argument specifies which dimension the operation runs along. That dimension is then removed from the output shape. 
+    \item \textbf{Rule of thumb:} \texttt{axis=-1} always moves along the rows (computing the aggregate across the columns within each row), regardless of the number of dimensions.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{contents/Images/NumPy/sub_aggregations.png}
+    \caption{Aggregate operations}
+\end{figure}
+
+\lstinputlisting[caption={Aggregating entire arrays and aggregating along specific axes.}]{contents/listings/numpy/aggregations.py}
+
+
+\subsection{Sorting Arrays}
+NumPy provides two main ways to sort data, depending on whether you want to preserve the original array:
+\begin{itemize}
+    \item \texttt{np.sort(x)}: Creates and returns a \textbf{sorted copy}; the original array \texttt{x} is not modified.
+    \item \texttt{x.sort()}: Sorts the array \textbf{in-place}, modifying \texttt{x} directly.
+\end{itemize}
+By default, the array is sorted along the last axis (\texttt{axis=-1}). Note that each row or column is sorted independently; sorting a matrix does not order all elements globally. Additionally, \texttt{np.argsort(x)} returns the indices that would sort the array, which is a common pattern used to sort secondary data based on these values.
+
+\lstinputlisting[caption={Sorting values and using argsort to get sorting indices.}]{contents/listings/numpy/sorting_arrays.py}
+
+
+\subsection{Algebraic Operations}
+NumPy handles linear algebra explicitly using dedicated functions and operators.
+\begin{itemize}
+    \item \texttt{np.dot(x, y)} covers multiple cases depending on the inputs: inner product of two 1-D arrays, matrix times a vector, and matrix times a matrix.
+    \item Since Python 3.5, you can use the \texttt{@} operator for matrix multiplication, which greatly improves the readability of long formulas.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{contents/Images/NumPy/sub_algebra.png}
+    \caption{Algebra Operations}
+\end{figure}
+
+\lstinputlisting[caption={Matrix products and inner products.}]{contents/listings/numpy/algebra_ops.py}
+
+
+\section{Broadcasting}
+Broadcasting is a powerful mechanism that allows NumPy to perform operations between arrays with different shapes. It does so without copying data in memory, making it highly efficient.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\linewidth]{contents/Images/NumPy/broadcast_example.png}
+    \caption{Broadcasting example}
+\end{figure}
+
+\subsection{The Rules of Broadcasting}
+When operating on two arrays, NumPy compares their shapes element-wise, starting from the trailing dimensions (from right to left). The process strictly follows these three rules:
+\begin{enumerate}
+    \item \textbf{Pad with ones:} If the arrays have a different number of dimensions, the shape of the array with fewer dimensions is padded with leading ones on its left.
+    \item \textbf{Stretch dimensions of size 1:} If the shape along a specific dimension is 1 for one array and greater than 1 for the other, the array with size 1 is stretched to match the other array's size.
+    \item \textbf{Mismatch error:} If a dimension has different sizes in both arrays and neither is 1, broadcasting cannot be performed and NumPy raises an error.
+\end{enumerate}
+
+\subsection{Broadcasting Examples}
+A classic example is adding a 1-D vector to a column vector. If \texttt{x} has shape \texttt{(3,)} and \texttt{y} has shape \texttt{(3, 1)}:
+\begin{itemize}
+    \item Rule 1 pads \texttt{x} to shape \texttt{(1, 3)}.
+    \item Rule 2 stretches \texttt{x} downwards (to \texttt{3, 3}) and \texttt{y} sideways (to \texttt{3, 3}).
+    \item The result is a \texttt{(3, 3)} matrix.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{contents/Images/NumPy/sub_broadcasting_example.png}
+    \caption{Broadcasting steps example}
+\end{figure}
+
+\lstinputlisting[caption={Broadcasting a 1-D vector and a column vector.}]{contents/listings/numpy/broadcasting_rules.py}
+
+\lstinputlisting[caption={Example of a broadcasting failure due to incompatible shapes.}]{contents/listings/numpy/broadcasting_fail.py}
+
+
+\section{Accessing NumPy Arrays}
+
+\subsection{Simple Indexing and Slicing (Views)}
+\begin{itemize}
+    \item \textbf{Simple Indexing:} Uses one integer per axis, separated by commas (e.g., \texttt{x[1, 2]}). Negative indices count from the end of the array.
+    \item \textbf{Fewer indices than axes:} If you omit indices for trailing dimensions, NumPy implicitly fills them with a full slice \texttt{:}. For example, \texttt{x[1]} is equivalent to \texttt{x[1, :]}.
+    \item \textbf{Slicing:} Uses the \texttt{start:stop:step} syntax per axis.
+    \item \textbf{View vs. Copy:} A slice returns a \textbf{view} on the original data, not a copy. Writing into a slice modifies the original array. To safely manipulate data without altering the original, you must explicitly call \texttt{.copy()}.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{contents/Images/NumPy/sub_slicing_views.png}
+    \caption{Simple indexing, implicit full slices and slicing}
+\end{figure}
+
+\lstinputlisting[caption={Simple indexing, slicing, and the difference between a view and a copy.}]{contents/listings/numpy/slicing_views.py}
+
+
+\subsection{Masking: Select with a Boolean Array}
+Masking allows you to select elements by passing a boolean array (the mask) of the same shape as the original array.
+\begin{itemize}
+    \item Only elements corresponding to \texttt{True} in the mask are kept.
+    \item The output of a mask applied to a full array is always flattened to a 1-D array, because the selected elements rarely form a perfect rectangle.
+    \item You can combine multiple conditions using bitwise operators: \texttt{\&} (and), \texttt{|} (or), \texttt{\^} (xor), and \texttt{\~} (negation). Parentheses around conditions are mandatory because bitwise operators bind tighter than comparisons.
+    \item Unlike slicing, masking creates a \textbf{copy} of the data.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{contents/Images/NumPy/sub_masking.png}
+    \caption{Selecting elements with a boolean mask and combining conditions}
+\end{figure}
+
+\lstinputlisting[caption={Applying masks and combining conditions.}]{contents/listings/numpy/masking_arrays.py}
+
+\subsection{Fancy Indexing: Select by Index}
+Fancy indexing involves passing lists of indices to select specific elements.
+\begin{itemize}
+    \item With a single list, only the first axis is indexed.
+    \item With two lists, they are read \textbf{in pairs} as coordinate points. For example, \texttt{x[[1, 2], [0, 2]]} selects the cell at \texttt{(1, 0)} and the cell at \texttt{(2, 2)}; it does \textit{not} select a $2 \times 2$ block.
+    \item Fancy indexing also returns a \textbf{copy} of the selected elements.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{contents/Images/NumPy/sub_fancy_indexing.png}
+    \caption{Fancy indexing with one list and with two lists read in pairs}
+\end{figure}
+
+\lstinputlisting[caption={Fancy indexing using lists and extracting coordinate pairs.}]{contents/listings/numpy/fancy_indexing.py}
+
+\subsection{Summary: View or Copy?}
+When combining different indexing techniques, it is essential to know whether you get a view or a copy:
+\begin{itemize}
+    \item \textbf{View:} Simple indexing (\texttt{x[1, 2]}) and standard slicing (\texttt{x[:, 1:]}).
+    \item \textbf{Copy:} Masking (\texttt{x[x>4]}) and Fancy Indexing (\texttt{x[[1, 3]]}).
+    \item \textbf{Combined:} A combination results in a view \textit{only} if it relies exclusively on simple indexing and slicing. As soon as a mask or a list is introduced, the result is a copy.
+\end{itemize}
+
+
+\section{Working with Arrays}
+
+\subsection{Concatenating Arrays}
+Concatenation joins two or more arrays along an existing axis. The resulting array has the same number of dimensions as the inputs. When concatenating, the sizes of all axes must match exactly, except for the axis along which you are concatenating.
+\begin{itemize}
+    \item \texttt{np.concatenate((x, y), axis=0)}: The standard function to join arrays.
+    \item \texttt{np.hstack((x, y))}: A shortcut for horizontal stacking, equivalent to \texttt{axis=1}.
+    \item \texttt{np.vstack((x, y))}: A shortcut for vertical stacking, equivalent to \texttt{axis=0}.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{contents/Images/NumPy/sub_concatenating.png}
+    \caption{Concatenating along axis 0 and axis 1, and stacking 1-D vectors}
+\end{figure}
+
+A special feature of \texttt{vstack} is that it can stack 1-D vectors along a \textit{new} axis (turning two 1-D vectors into a 2D matrix), whereas \texttt{np.concatenate} requires the axis to already exist.
+
+\lstinputlisting[caption={Concatenating arrays vertically and horizontally.}]{contents/listings/numpy/concatenation.py}
+
+\subsection{Splitting Arrays}
+Splitting does the opposite of concatenation, dividing an array into multiple smaller arrays. It outputs a standard Python list of arrays.
+\begin{itemize}
+    \item \texttt{np.split(arr, N, axis=0)}: The general splitting function. If \texttt{N} is an integer, it divides the array into \texttt{N} equal parts. If \texttt{N} is a list, it cuts the array exactly at those index positions.
+    \item \texttt{np.hsplit(x, N)} and \texttt{np.vsplit(x, N)}: Convenient aliases for splitting horizontally (\texttt{axis=1}) and vertically (\texttt{axis=0}).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{contents/Images/NumPy/sub_splitting.png}
+    \caption{Splitting into equal parts, at given indices, and along columns}
+\end{figure}
+
+\lstinputlisting[caption={Splitting arrays into equal parts or at specific indices.}]{contents/listings/numpy/splitting.py}
+
+\subsection{Reshaping Arrays}
+Reshaping changes the dimensions of an array without modifying the underlying data. By default, the new shape is filled row by row.
+\begin{itemize}
+    \item \texttt{x.reshape((rows, cols))}: Rearranges the elements into the specified shape. The total size (number of elements) must remain exactly the same, otherwise NumPy raises an error.
+    \item \textbf{The \texttt{-1} shortcut:} At most one dimension can be specified as \texttt{-1}. NumPy automatically calculates the correct size for this unknown dimension based on the total size of the array and the other provided dimensions.
+    \item \textbf{Memory behavior:} Reshaping simply changes how the memory buffer is read (returning a view). However, if the array is not contiguous in memory (e.g., a slice with a step), NumPy might be forced to make a copy.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{contents/Images/NumPy/sub_reshaping.png}
+    \caption{Reshaping row by row, the -1 wildcard, and a size mismatch}
+\end{figure}
+
+\lstinputlisting[caption={Reshaping arrays and using the -1 wildcard.}]{contents/listings/numpy/reshaping.py}
+
+\subsection{Saving and Loading Arrays}
+NumPy provides a simple and robust way to save arrays to disk. Unlike CSV files, saving in NumPy's native format preserves the exact \texttt{dtype} and shape.
+\begin{itemize}
+    \item \textbf{Single array:} Use \texttt{np.save(filename, x)} to save a single array (adds a \texttt{.npy} extension) and \texttt{np.load(filename)} to read it back.
+    \item \textbf{Multiple arrays:} Use \texttt{np.savez("archive", x=arr1, y=arr2)} to save multiple arrays into a compressed \texttt{.npz} archive. When loaded, it behaves like a Python dictionary where you can access the arrays by their keyword names.
+\end{itemize}
+
+\lstinputlisting[caption={Saving and loading single and multiple NumPy arrays.}]{contents/listings/numpy/save_load.py}
+
+
+\section{Wrapping Up: Core Principles of NumPy}
+\begin{enumerate}
+    \item An array is a single contiguous memory buffer with one \texttt{dtype}: this design is the source of both its speed and memory efficiency.
+    \item Axes and shapes form the vocabulary of NumPy operations. Aggregation functions consume the axis you specify, and simple indexing consumes the axis you index.
+    \item Broadcasting follows three strict rules: pad the shorter shape with leading ones, stretch axes of size 1, and fail if two sizes above 1 differ.
+    \item Slicing provides views on the original data, whereas masking and fancy indexing provide independent copies. This dictates whether assigning new values reaches the original array.
+    \item Functions like \texttt{concatenate}, \texttt{split}, and \texttt{reshape} rearrange how the array structure is presented without ever touching or copying the raw numbers in memory (whenever possible).
+\end{enumerate}
+
+\section{Exercises}
+
+%==============================================================
+\subsection{2.1\_numpy\_arrays}
+
+\subsubsection{Exercise 1}
+\textbf{Task:} Given the lists \texttt{l1 = [0., 1., 2.]} and \texttt{l2 = [True, False]}, create the corresponding NumPy arrays and print their types.
+
+\textbf{Explanation:} \texttt{np.array()} converts a Python list into an array. NumPy infers the \texttt{dtype} from the content: decimal numbers become \texttt{float64}, booleans become \texttt{bool}.
+
+\begin{lstlisting}[caption={Creating arrays from lists and checking dtype and shape.}]
+import numpy as np
+
+l1 = [0., 1., 2.]
+l2 = [True, False]
+
+a1 = np.array(l1)
+a2 = np.array(l2)
+
+print("a1:", a1, "| dtype:", a1.dtype, "| shape:", a1.shape)
+print("a2:", a2, "| dtype:", a2.dtype, "| shape:", a2.shape)
+
+# a1: [0. 1. 2.]     | dtype: float64 | shape: (3,)
+# a2: [ True False]  | dtype: bool    | shape: (2,)
+\end{lstlisting}
+
+\subsubsection{Exercise 2}
+\textbf{Task:} Create a multidimensional array from the list of lists \texttt{l1 = [[[0., 1., 2.], [3., 4., 5.]], [[6., 7., 8.], [9., 10., 11.]]]}, then print its number of rows and columns.
+
+\textbf{Explanation:} The list has three levels of nesting, so the array has three axes. The shape is read from the outside in: 2 blocks, each with 2 rows of 3 columns. Rows and columns are therefore the last two entries of the shape.
+
+\begin{lstlisting}[caption={A 3-D array and its shape.}]
+l1 = [[[0., 1., 2.], [3., 4., 5.]],
+      [[6., 7., 8.], [9., 10., 11.]]]
+
+a1 = np.array(l1)
+print("shape:", a1.shape)        # (2, 2, 3) -> 2 blocks, 2 rows, 3 columns
+
+rows = a1.shape[-2]              # second-to-last axis
+cols = a1.shape[-1]              # last axis
+print("rows:", rows, "columns:", cols)   # rows: 2 columns: 3
+\end{lstlisting}
+
+\subsubsection{Exercise 3}
+\textbf{Task:} Without using lists, create:
+\begin{itemize}
+    \item a $3 \times 3$ array of 1s;
+    \item a $2 \times 2$ array of 0s;
+    \item a $1 \times 2$ array of 9s;
+    \item an array of shape \texttt{()} with value 39;
+    \item an array of shape \texttt{(2, 5)} with random values between 0 and 1;
+    \item an array with 100 equispaced elements between 0 and 5.
+\end{itemize}
+
+\textbf{Explanation:} NumPy provides constructor functions that take the shape as a tuple. \texttt{np.full} fills any shape with a given value. A shape \texttt{()} means a 0-D array, i.e. a single scalar. \texttt{np.linspace(start, stop, n)} includes both endpoints.
+
+\begin{lstlisting}[caption={Creating arrays with constructor functions.}]
+a1 = np.ones((3, 3))               # 3 x 3 of 1.
+a2 = np.zeros((2, 2))              # 2 x 2 of 0.
+a3 = np.full((1, 2), 9)            # [[9 9]]
+a4 = np.full((), 39)               # 0-D array: 39, shape ()
+a5 = np.random.random((2, 5))      # values in [0, 1)
+a6 = np.linspace(0, 5, 100)        # 100 values, 0 and 5 included
+
+for a in (a1, a2, a3, a4, a5, a6):
+    print(a, "-> shape:", a.shape, "\n")
+\end{lstlisting}
+
+%==============================================================
+\subsection{2.2\_numpy\_operations}
+
+\subsubsection{Exercise 1}
+\textbf{Task:} Given \texttt{x = [4, -1, 7, 9, 3, -5]}, compute the sigmoid function $\sigma(x) = \frac{1}{1 + e^{-x}}$, which maps $(-\infty, +\infty)$ to $(0, 1)$.
+
+\textbf{Explanation:} \texttt{np.exp} is a unary ufunc and \texttt{+}, \texttt{/} are binary ufuncs, so the whole formula is applied element by element without a loop. Large positive values give results close to 1, large negative values give results close to 0.
+
+\begin{lstlisting}[caption={Sigmoid function with ufuncs.}]
+x = np.array([4, -1, 7, 9, 3, -5])
+
+y = 1 / (1 + np.exp(-x))
+print(y)
+# [0.982 0.269 0.999 0.9999 0.953 0.0067]  (rounded)
+\end{lstlisting}
+
+\subsubsection{Exercise 2}
+\textbf{Task:} Given \texttt{x = [[2, 3, -4], [7, 5, 9]]}, return the mean of the elements along the rows and the minimum element along the columns.
+
+\textbf{Explanation:} \texttt{axis=-1} moves along each row, giving one value per row. \texttt{axis=0} moves down each column, giving one value per column.
+
+\begin{lstlisting}[caption={Aggregations along different axes.}]
+x = np.array([[2, 3, -4],
+              [7, 5, 9]])
+
+row_mean = x.mean(axis=-1)   # one value per row    -> [0.333 7.   ]
+col_min  = x.min(axis=0)     # one value per column -> [ 2  3 -4]
+
+print("mean along rows:", row_mean)
+print("min along columns:", col_min)
+\end{lstlisting}
+
+\subsubsection{Exercise 3}
+\textbf{Task:} Given the same array as in Exercise 1, find the 3 highest values and the positions of the 2 lowest values.
+
+\textbf{Explanation:} \texttt{np.sort} and \texttt{np.argsort} both sort in ascending order. The highest values are therefore the \emph{last} elements of the sorted array (\texttt{[-3:]}), and the positions of the lowest values are the \emph{first} indices returned by \texttt{argsort} (\texttt{[:2]}).
+
+\begin{lstlisting}[caption={Highest values with sort, lowest positions with argsort.}]
+x = np.array([4, -1, 7, 9, 3, -5])
+
+highest = np.sort(x)[-3:]        # sorted: [-5 -1  3  4  7  9] -> last 3
+lowest_idx = np.argsort(x)[:2]   # argsort: [5 1 4 0 2 3]     -> first 2
+
+print("3 highest values:", highest)          # [4 7 9]
+print("positions of 2 lowest:", lowest_idx)  # [5 1] -> x[5] = -5, x[1] = -1
+\end{lstlisting}
+
+\subsubsection{Exercise 4}
+\textbf{Task:} Compute the product between \texttt{x1 = [[0, 1, 2], [3, 4, 5]]} and \texttt{x2 = [1, 2]}. Does it raise an error? How should \texttt{x2} be modified to make the operation possible?
+
+\textbf{Explanation:} \texttt{x1} has shape \texttt{(2, 3)} and \texttt{x2} has shape \texttt{(2,)}. By rule 1, \texttt{x2} is padded to \texttt{(1, 2)}. Comparing the last axis gives $3 \neq 2$ and neither is 1, so rule 3 raises an error. There are two fixes:
+\begin{itemize}
+    \item give \texttt{x2} three elements, shape \texttt{(3,)}, so it is multiplied with every \emph{row};
+    \item turn \texttt{x2} into a column, shape \texttt{(2, 1)}, so each value is multiplied with a whole \emph{row}.
+\end{itemize}
+
+\begin{lstlisting}[caption={A broadcasting error and two ways to fix it.}]
+x1 = np.array([[0, 1, 2],
+               [3, 4, 5]])               # shape (2, 3)
+
+x2 = np.array([1, 2])                    # shape (2,)
+# x1 * x2  -> ValueError: (2, 3) vs (1, 2), 3 != 2
+
+# Fix 1: one value per column, shape (3,) -> (1, 3) -> (2, 3)
+x2_a = np.array([1, 2, 3])
+print(x1 * x2_a)       # [[ 0  2  6]
+                       #  [ 3  8 15]]
+
+# Fix 2: one value per row, shape (2, 1) -> (2, 3)
+x2_b = x2.reshape((2, 1))                # [[1], [2]]
+print(x1 * x2_b)       # [[ 0  1  2]
+                       #  [ 6  8 10]]
+\end{lstlisting}
+
+\subsubsection{Exercise 5}
+\textbf{Task:} A dataset is often stored as a matrix with one row per sample and one column per feature. Given \texttt{data = [[1, 200], [3, 400], [5, 900]]}, subtract from every column its mean, so that each feature has mean 0, without a loop. Which shapes are involved, and which broadcasting rules apply? Check that the mean of each column of the result is 0.
+
+\textbf{Explanation:} The column means have shape \texttt{(2,)}, while \texttt{data} has shape \texttt{(3, 2)}. Rule 1 pads the means to \texttt{(1, 2)`}, and rule 2 stretches them to \texttt{(3, 2)}. The same mean is therefore subtracted from every row, and every column of the result has mean 0.
+
+\begin{lstlisting}[caption={Centering each feature with broadcasting.}]
+data = np.array([[1, 200],
+                 [3, 400],
+                 [5, 900]])              # shape (3, 2)
+
+mean = data.mean(axis=0)                 # [  3. 500.], shape (2,)
+z = data - mean                          # (3, 2) - (2,) -> (3, 2)
+
+print(z)               # [[  -2. -300.]
+                       #  [   0. -100.]
+                       #  [   2.  400.]]
+print(z.mean(axis=0))  # [0. 0.]
+\end{lstlisting}
+
+%==============================================================
+\subsection{2.3\_numpy\_array\_manipulation}
+
+\subsubsection{Exercise 1}
+\textbf{Task:} Given \texttt{x = [[3.0, 2.0, 5.0], [1.0, 4.0, 2.0], [6.0, 7.0, 8.0]]}, return two arrays:
+\begin{itemize}
+    \item the mean of the elements of the second column;
+    \item the elements greater than 2 in the second and third rows.
+\end{itemize}
+
+\textbf{Explanation:} The second column is index 1 on axis 1, so it is selected with the slice \texttt{x[:, 1]}. The second and third rows are \texttt{x[1:3]}. A mask on that sub-array then keeps only the values greater than 2, and the result is flattened to 1-D.
+
+\begin{lstlisting}[caption={Slicing a column, slicing rows and applying a mask.}]
+x = np.array([[3.0, 2.0, 5.0],
+              [1.0, 4.0, 2.0],
+              [6.0, 7.0, 8.0]])
+
+# 1) mean of the second column
+sec_col = x[:, 1]                 # [2. 4. 7.]
+sec_col_mean = sec_col.mean()     # 4.333
+print("second column:", sec_col, "| mean:", sec_col_mean)
+
+# 2) elements > 2 in the second and third rows
+rows = x[1:3]                     # [[1. 4. 2.]
+                                  #  [6. 7. 8.]]
+result = rows[rows > 2]           # mask -> flattened to 1-D
+print("elements > 2:", result)    # [4. 6. 7. 8.]
+\end{lstlisting}

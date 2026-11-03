@@ -1,0 +1,191 @@
+% document type
+\documentclass[a4paper, twoside, openright]{report}
+% character encoding
+\usepackage[utf8]{inputenc}
+% text encoding
+\usepackage[T1]{fontenc}
+% borders size
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=3cm]{geometry}
+% font size
+\usepackage[fontsize=12pt]{scrextend}
+% language of text
+\usepackage[english]{babel}
+% lingua per la bibliografia
+\usepackage[fixlanguage]{babelbib}
+% package per generare testo fittizio. Potrebbe essere
+% utile nel controllare quanto un capitolo potrebbe essere
+% grande e quindi quanto occupa nella pagina
+\usepackage{lipsum}
+% per ruotare le immagini
+\usepackage{rotating}
+% per modificare l'header delle pagine 
+\usepackage{fancyhdr}
+% per allineare in modo giustificato
+\usepackage{ragged2e}
+\justifying
+% uso delle immagini
+\usepackage{graphicx}
+\usepackage{float}
+% uso dei colori
+\usepackage[dvipsnames, table]{xcolor}         
+% uso dei listing per il codice
+\usepackage{listings}          
+% per inserire gli hyperlinks tra i vari elementi del testo 
+\usepackage[colorlinks=true, allcolors=black]{hyperref}    
+% diversi tipi di sottolineature
+\usepackage[normalem]{ulem}
+% package e comando per creare pagine vuote
+\usepackage{afterpage}
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage
+}
+    
+% package per creare comandi personalizzati
+\usepackage{xpatch}
+% package helper per le liste puntate
+\usepackage{enumitem}
+% package per l'utilizzo dei colori
+% package per l'highlighting del codice
+\usepackage{minted}
+% package per gestire le caption
+\usepackage{caption}
+\usepackage{subcaption}
+% per gestire tabelle su più pagine
+\usepackage{longtable}
+% per combinare le righe di una tabella
+\usepackage{multirow}
+% per creare i tree di directory
+\usepackage{dirtree}
+
+% per le icone a fianco dei titoli di sezione
+\usepackage{etoolbox}
+\newcommand{\icon}[1]{\includegraphics[height=12pt]{#1}}
+\robustify{\icon}
+
+\usepackage[absolute]{textpos}
+
+\usepackage{amsmath}
+
+
+\usepackage{booktabs}  % Per linee più eleganti (\toprule, \midrule)
+\usepackage{array}     % Per una gestione avanzata delle colonne
+\usepackage{url}
+\usepackage{subcaption}
+% 1. Per il disegno (l'ambiente tikzpicture)
+\usepackage{tikz}
+
+% 2. Per l'opzione [H] che forza la figura esattamente dove l'hai scritta
+\usepackage{float}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18} % Usa la versione più recente di pgfplots
+
+\captionsetup[table]{labelformat=simple, labelsep=colon}
+
+
+% Definizioni dei colori
+\definecolor{colGreen}{RGB}{198, 224, 180}   
+\definecolor{headBlue}{RGB}{189, 215, 238}   
+\definecolor{headOrange}{RGB}{244, 176, 132} 
+\definecolor{topRed}{RGB}{192, 0, 0}         
+\definecolor{topGray}{RGB}{231, 230, 230}    
+
+% Comandi personalizzati
+\newcommand{\inv}[1]{\cellcolor{colGreen}\textbf{Invio #1}}
+\newcommand{\ric}[1]{\cellcolor{colGreen}Ricevuto #1}
+\newcommand{\rim}[1]{\cellcolor{colGreen}\textbf{\textcolor{red}{Rimosso #1}}}
+\newcommand{\disc}{\cellcolor{colGreen}\textbf{\textcolor{red}{DISCONNESSIONE}}}
+
+\usepackage{placeins}
+
+\usepackage{changepage}
+% -----------------------------------------------------------------
+
+% Modifica lo stile dell'header
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\rightmark}
+\rhead{\textbf{\thepage}}
+\fancyfoot{}
+\setlength{\headheight}{15pt}
+
+% Rimuove il numero di pagina all'inizio dei capitoli
+\fancypagestyle{plain}{
+  \fancyfoot{}
+  \fancyhead{}
+  \renewcommand{\headrulewidth}{0pt}
+}
+
+% comandi per cambiare temporaneamente la lingua
+% abstract in inglese, al fine di cambiarne il titolo
+\xpretocmd{\abstract}{\selectlanguage{english}}{}{} 
+\xapptocmd{\endabstract}{\selectlanguage{italian}}{}{}
+
+% font monospace con il grassetto (quello di default non lo ha)
+\usepackage[scaled=0.85]{beramono}
+
+% colori per il codice
+\definecolor{codeBg}{RGB}{248, 248, 248}
+\definecolor{codeFrame}{RGB}{210, 210, 210}
+\definecolor{codeKeyword}{RGB}{0, 102, 153}
+\definecolor{codeString}{RGB}{204, 51, 0}
+\definecolor{codeComment}{RGB}{0, 140, 140}
+\definecolor{codeLib}{RGB}{153, 0, 153}
+
+% stile per il codice Python
+\lstdefinestyle{pythonstyle}{
+    language=Python,
+    backgroundcolor=\color{codeBg},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codeKeyword}\bfseries,
+    stringstyle=\color{codeString},
+    commentstyle=\color{codeComment}\itshape,
+    emph={np, pd, plt},
+    emphstyle=\color{codeLib}\bfseries,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt,
+    xleftmargin=2em,
+    framexleftmargin=1.5em,
+    frame=single,
+    rulecolor=\color{codeFrame},
+    framesep=4pt,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    breaklines=true,
+    tabsize=4,
+    captionpos=b,
+    aboveskip=4mm,
+    belowskip=4mm,
+    literate={à}{{\`a}}1 {è}{{\`e}}1 {é}{{\'e}}1
+             {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+}
+\lstset{style=pythonstyle}
+\renewcommand{\lstlistingname}{Listing}
+
+% environment per impostare il codice in piu' pagine
+\newenvironment{code}{\captionsetup{type=listing}}{}
+
+% -----------------------------------------------------------------
+\begin{document}
+
+\include{contents/TitlePage}
+\afterpage{\blankpage}
+
+\tableofcontents
+%\begin{adjustwidth}{0cm}{1.8cm}
+%\makeatletter
+%\@starttoc{toc}
+%\makeatother
+%\end{adjustwidth}
+
+%\include{contents/NumPy}
+%\include{contents/Pandas}
+\include{contents/Matplotlib}
+
+\end{document}
+% -----------------------------------------------------------------

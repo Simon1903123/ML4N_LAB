@@ -1,0 +1,14 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.jj": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/c:\\Users\\simon\\Simone_Files\\Lavoro\\Università Magistrale\\ML\\ML4N_LAB\\contents\\NumPy.aux": true,
+        "**/c:\\Users\\simon\\Simone_Files\\Lavoro\\Università Magistrale\\ML\\ML4N_LAB\\contents\\NumPy.log": true,
+        "**/c:\\Users\\simon\\Simone_Files\\Lavoro\\Università Magistrale\\ML\\ML4N_LAB\\contents\\NumPy.gz": true,
+        "**/c:\\Users\\simon\\Simone_Files\\Lavoro\\Università Magistrale\\ML\\ML4N_LAB\\contents\\NumPy.out": true
+    }
+}
